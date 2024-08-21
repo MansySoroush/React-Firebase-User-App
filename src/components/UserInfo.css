@@ -1,0 +1,96 @@
+
+/* User Info Form Container */
+.user-info-form {
+    position: relative;
+    background-color: #342703;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(235, 171, 9, 0.569);
+    width: 100%;
+    max-width: 480px;
+    margin: 30px auto 20px auto;
+}
+
+/* Form Inputs */
+.user-info-form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.user-info-form input:focus {
+    border-color: #aa9d05;
+    outline: none;
+}
+
+/* Form Placeholder Styling */
+.user-info-form input::placeholder {
+    color: #999;
+    font-size: 14px;
+}
+
+/* Form Button */
+.user-info-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #a99766;
+    border: none;
+    border-radius: 5px;
+    color: #3c3310;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+    margin-top: 15px;
+}
+
+.user-info-form button:hover {
+    background-color: #83754e;
+}
+
+.user-info-form button:focus {
+    outline: none;
+    background-color: #675b3c;
+}
+
+/* Checkbox Container */
+.user-info-form .checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.user-info-form .checkbox-container input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #a99766; /* Change the color of the checkbox when checked */
+}
+
+.user-info-form .checkbox-container label {
+    color: #ddd;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none; /* Prevent text selection when clicking */
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+    .user-info-form {
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .user-info-form input,
+    .user-info-form button {
+        font-size: 14px;
+    }
+
+    .user-info-form .checkbox-container label {
+        font-size: 13px;
+    }
+}

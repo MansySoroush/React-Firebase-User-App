@@ -1,25 +1,18 @@
-import React, { userState } from "react";
-import { auth } from "../firebase";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth"
+import React from "react";
+
+export const LoginStatus = {
+    NO_USER_LOGIN: 'NO_USER_LOGIN',
+    LOGIN_IN_PROGRESS: 'LOGIN_IN_PROGRESS',
+    COMPLETE_LOGIN: 'COMPLETE_LOGIN'
+};
 
 function Header(props) {
-    const googleAuth = new GoogleAuthProvider();
-    const [user, setUser] = useAuthState(auth);
 
-    const handleAuth = async() => {
-        try {
-            if (user) {
-                // Logout user
-                await auth.signOut();
-                props.onLogout();
-            } else {
-                // Login user with Google
-                const result = await signInWithPopup(auth, googleAuth);
-                props.onLogin();
-            }
-        } catch (error) {
-            console.error("Error during authentication:", error);
+    const handleAuth = (event) => {
+        if (event.target.id === 'loginButton'){
+            props.onStartLogin();    
+        } else {
+            props.onLogout();    
         }
     };
         
@@ -30,8 +23,10 @@ function Header(props) {
                     <h1>User Info App</h1>
 
                     <div>
-                        {user && <p class="mb-0 d-inline">Welcome, <span id="userName">{user.displayName}</span></p>} 
-                        <button class="btn btn-primary d-inline ms-2" id="loginButton" onClick={handleAuth}>{user ? "Logout" : "Login with Google"}</button>
+                        {(props.userLoginStatus === LoginStatus.COMPLETE_LOGIN) && <p class="mb-0 d-inline">Welcome, <span id="userName">{props.userName}</span></p>} 
+                        {(props.userLoginStatus === LoginStatus.COMPLETE_LOGIN) && <button class="btn btn-primary d-inline ms-2" id="logoutButton" onClick={handleAuth}>Logout</button>}
+                        {(props.userLoginStatus === LoginStatus.NO_USER_LOGIN) && <button class="btn btn-primary d-inline ms-2" id="loginButton" onClick={handleAuth}>Login</button>}
+                        {(props.userLoginStatus === LoginStatus.LOGIN_IN_PROGRESS) && <p class="mb-0 d-inline">Login is in progress...</p>}
                     </div>
                 </div>
             </nav>
