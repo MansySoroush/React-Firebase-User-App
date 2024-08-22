@@ -6,6 +6,7 @@ function Register(props) {
         email: "",
         password: "",
         name: "",
+        age: "",
         phone: "",
         country: "",
     });
@@ -26,9 +27,17 @@ function Register(props) {
         event.preventDefault();
     };
 
+    const handleCancelRegister = (event) => {
+        props.onCancelRegister()
+        event.preventDefault();
+    };
+
     return (
     <div>
         <form className="user-info-form">
+            <div className="register-notice">
+                <p>Please register first before logging in.</p>
+            </div>
             <input name="email"
                 value={userInfo.email}
                 onChange={handleChange}
@@ -44,6 +53,11 @@ function Register(props) {
                 onChange={handleChange}
                 placeholder="Name"
             />
+            <input name="age"
+                value={userInfo.age}
+                onChange={handleChange}
+                placeholder="Age"
+            />
             <input name="phone"
                 value={userInfo.phone}
                 onChange={handleChange}
@@ -54,7 +68,10 @@ function Register(props) {
                 onChange={handleChange}
                 placeholder="Country"
             />
-            <button onClick={handleRegister}>Register</button>
+            <div className="button-container">
+                <button onClick={handleRegister}>Register</button>
+                <button onClick={handleCancelRegister}>Cancel</button>
+            </div>
         </form>
     </div>
     );

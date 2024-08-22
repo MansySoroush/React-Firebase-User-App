@@ -26,13 +26,29 @@ function CreateArea(props) {
         props.onRegister(userInfo);
     };
 
+    const handleShowRegister = async () => {
+        props.onShowRegister();
+    };
+
+    const handleCancelLogin = async () => {
+        props.onCancelLogin();
+    };
+
+    const handleCancelRegister = async () => {
+        props.onCancelRegister();
+    };
+
     return (
         <main>
             <Routes>
                 {props.activePage === ActiveMainPage.HOME_PAGE && <Route path="/" element={<Home />} />}
                 {props.activePage === ActiveMainPage.USERS_PAGE && <Route path="/" element={<Users />} />}
-                {props.activePage === ActiveMainPage.LOGIN_PAGE && <Route path="/" element={<Login onLogin={handleLogin}  onLoginWithGoogle={handleLoginWithGoogle} />} />}
-                {props.activePage === ActiveMainPage.REGISTER_PAGE && <Route path="/" element={<Register onRegister={handleRegister} />} />}
+                {props.activePage === ActiveMainPage.LOGIN_PAGE && <Route path="/" element={<Login onLogin={handleLogin}  
+                                                                                                    onLoginWithGoogle={handleLoginWithGoogle}
+                                                                                                    onCancelLogin={handleCancelLogin}
+                                                                                                    onShowRegister={handleShowRegister} />} />}
+                {props.activePage === ActiveMainPage.REGISTER_PAGE && <Route path="/" element={<Register onRegister={handleRegister}
+                                                                                                        onCancelRegister={handleCancelRegister} />} />}
             </Routes>
         </main>
     );

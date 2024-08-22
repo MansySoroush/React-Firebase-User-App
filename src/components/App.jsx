@@ -6,6 +6,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import Header, { LoginStatus } from './Header';
 import CreateArea, { ActiveMainPage } from './CreateArea';
 import Footer from './Footer';
+import { isNewUser, addUser } from "../firebaseCRUD";
 
 function App() {
   const [activeMainPage, setActiveMainPage] = useState(ActiveMainPage.HOME_PAGE);
@@ -16,10 +17,38 @@ function App() {
     prompt: 'select_account'
   });
   const [user, setUser] = useAuthState(auth);
+  const [currentUserName, setCurrentUserName] = useState("");
 
-  const showUserLoginForm = async() => {
+  const showUserLoginForm = () => {
     setActiveMainPage(ActiveMainPage.LOGIN_PAGE);
     setLoginState(LoginStatus.LOGIN_IN_PROGRESS);
+  }
+
+  const resetUserLoginStatus = () => {
+    setActiveMainPage(ActiveMainPage.HOME_PAGE);
+    setLoginState(LoginStatus.NO_USER_LOGIN);
+    setCurrentUserName("");
+  }
+
+  const completeUserLoginProcess = (userName) => {
+    setLoginState(LoginStatus.COMPLETE_LOGIN);
+    setActiveMainPage(ActiveMainPage.USERS_PAGE);
+
+    if (userName !== "") {
+      setCurrentUserName(userName);
+    }
+  }
+
+  const forceUserToLogout = async () => {
+    if (user) {
+      try {
+        // Logout user
+        await auth.signOut();
+      } catch (error) {
+          console.error("Error during Logout:", error);
+      }
+    }
+    resetUserLoginStatus();
   }
 
   const userLogout = async () => {
@@ -28,8 +57,7 @@ function App() {
         // Logout user
         await auth.signOut();
       }
-      setActiveMainPage(ActiveMainPage.HOME_PAGE);
-      setLoginState(LoginStatus.NO_USER_LOGIN);
+      resetUserLoginStatus();
     } catch (error) {
         console.error("Error during Logout:", error);
     }
@@ -39,34 +67,37 @@ function App() {
     try {
       if (loginState === LoginStatus.LOGIN_IN_PROGRESS) {
         // Check if user hasn't register yet. (new user)
-        const new_user = false;
+        const new_user = await isNewUser(loginInfo.email);
         if (new_user) {
-          setActiveMainPage(ActiveMainPage.REGISTER_PAGE);          
+          setActiveMainPage(ActiveMainPage.REGISTER_PAGE);
         } else {
-          // Login user with Google
-          setLoginState(LoginStatus.COMPLETE_LOGIN);
-          setActiveMainPage(ActiveMainPage.USERS_PAGE);
+          completeUserLoginProcess(loginInfo.name);
         }
       }
     } catch (error) {
-        console.error("Error during authentication:", error);
+        console.error("Error during Login:", error);
     }
   }
 
   const userLoginWithGoogle = async (loginInfo) => {
     try {
       if (loginState === LoginStatus.LOGIN_IN_PROGRESS) {
-        // Check if user hasn't register yet. (new user)
-        const new_user = false;
-        if (new_user) {
-          setActiveMainPage(ActiveMainPage.REGISTER_PAGE);          
+        // Login user with Google
+        const result = await signInWithPopup(auth, googleAuth);
+
+        if (result.user) {
+          // Check if user hasn't register yet. (new user)
+          const new_user = await isNewUser(result.user.email);
+
+          if (new_user) {
+            setActiveMainPage(ActiveMainPage.REGISTER_PAGE);
+          } else {
+            completeUserLoginProcess(result.user.displayName);
+          }
         } else {
-          // Login user with Google
-          const result = await signInWithPopup(auth, googleAuth);
-          setLoginState(LoginStatus.COMPLETE_LOGIN);
-          setActiveMainPage(ActiveMainPage.USERS_PAGE);
+          resetUserLoginStatus();
         }
-      }
+    }
     } catch (error) {
         console.error("Error during authentication:", error);
     }
@@ -74,25 +105,49 @@ function App() {
 
   const userRegister = async (userInfo) => {
     try {
-      console.log(loginState);
-
       if (loginState === LoginStatus.LOGIN_IN_PROGRESS) {
-        // Register new user
+        if ((userInfo.email === "") || (userInfo.name === "")) {
+          console.log('empty user info');
+          return;
+        }
 
-        // Login user with Google
-        const result = await signInWithPopup(auth, googleAuth);
-        setLoginState(LoginStatus.COMPLETE_LOGIN);
-        setActiveMainPage(ActiveMainPage.USERS_PAGE);
+        // Register new user
+        const newUserDoc = await addUser(userInfo.email, userInfo.name, userInfo.age, userInfo.phone, userInfo.country);
+
+        completeUserLoginProcess("");
       }
     } catch (error) {
-        console.error("Error during authentication:", error);
+        console.error("Error during Registration:", error);
+    }
+  }
+
+  const showUserRegisterForm = () => {
+    if (loginState === LoginStatus.LOGIN_IN_PROGRESS) {
+      setActiveMainPage(ActiveMainPage.REGISTER_PAGE);
+    }
+  }
+
+  const cancelLogin = () => {
+    if (user) {
+      forceUserToLogout();
+    } else {
+      resetUserLoginStatus();
+    }
+  }
+
+  const cancelRegister = () => {
+    if (user) {
+      forceUserToLogout();
+    } else {
+      resetUserLoginStatus();
     }
   }
 
   return (
     <Router>
       <Header userLoginStatus={loginState} userName={user && user.displayName} onStartLogin={showUserLoginForm} onLogout={userLogout} />
-      <CreateArea activePage={activeMainPage} onLoginWithGoogle={userLoginWithGoogle} onLogin={userLogin} onRegister={userRegister}/>
+      <CreateArea activePage={activeMainPage} onLoginWithGoogle={userLoginWithGoogle} onLogin={userLogin} onCancelLogin={cancelLogin} 
+                                              onRegister={userRegister} onShowRegister={showUserRegisterForm} onCancelRegister={cancelRegister}/>
       <Footer />
     </Router>
   )

@@ -34,6 +34,16 @@ function Login(props) {
         setUseGoogle(event.target.checked);
     };
 
+    const handleShowRegister = (event) => {
+        props.onShowRegister();
+        event.preventDefault();
+    };
+
+    const handleCancelLogin = (event) => {
+        props.onCancelLogin();
+        event.preventDefault();
+    };
+
     return (
     <div>
         <form className="user-info-form">
@@ -56,7 +66,13 @@ function Login(props) {
                 />
                 <label htmlFor="googleLogin">Login with Google Account</label>
             </div>
-            <button onClick={handleLogin}>{useGoogle ? "Login with Google" : "Login"}</button>
+            <div className="button-container">
+                    <button onClick={handleLogin}>
+                        {useGoogle ? "Login with Google" : "Login"}
+                    </button>
+                    <button onClick={handleShowRegister}>Register</button>
+                    <button onClick={handleCancelLogin}>Cancel</button>
+            </div>
         </form>
     </div>
     );
