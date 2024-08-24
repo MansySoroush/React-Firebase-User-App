@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import './UserInfo.css';
 
 function Register(props) {
+    const [imagePreview, setImagePreview] = useState(null);
     const [userInfo, setUserInfo] = useState({
-        email: "",
-        password: "",
+        email: props.userRegisterInfo.email,
+        password: props.userRegisterInfo.password,
         name: "",
-        age: "",
         phone: "",
-        country: "",
+        image: null,
     });
-    
+
     function handleChange(event) {
         const { name, value } = event.target;
     
@@ -22,6 +22,14 @@ function Register(props) {
         });
     }
     
+    function handleImageChange(event) {
+        const imageFile = event.target.files[0];
+        setUserInfo((prevInfo) => ({
+            ...prevInfo,
+            image: imageFile,
+        }));
+    }
+
     const handleRegister = (event) => {
         props.onRegister(userInfo)
         event.preventDefault();
@@ -53,21 +61,21 @@ function Register(props) {
                 onChange={handleChange}
                 placeholder="Name"
             />
-            <input name="age"
-                value={userInfo.age}
-                onChange={handleChange}
-                placeholder="Age"
-            />
             <input name="phone"
                 value={userInfo.phone}
                 onChange={handleChange}
                 placeholder="Phone"
             />
-            <input name="country"
-                value={userInfo.country}
-                onChange={handleChange}
-                placeholder="Country"
+            <input name="image" 
+                type="file" 
+                onChange={handleImageChange} 
+                accept="image/*"
             />
+            {(props.errorRegisterMessage !== "") && 
+                <div className="error-message-notice">
+                    <p>{props.errorRegisterMessage}</p>
+                </div>
+            }
             <div className="button-container">
                 <button onClick={handleRegister}>Register</button>
                 <button onClick={handleCancelRegister}>Cancel</button>

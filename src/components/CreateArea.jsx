@@ -46,9 +46,12 @@ function CreateArea(props) {
                 {props.activePage === ActiveMainPage.LOGIN_PAGE && <Route path="/" element={<Login onLogin={handleLogin}  
                                                                                                     onLoginWithGoogle={handleLoginWithGoogle}
                                                                                                     onCancelLogin={handleCancelLogin}
-                                                                                                    onShowRegister={handleShowRegister} />} />}
+                                                                                                    onShowRegister={handleShowRegister}
+                                                                                                    errorLoginMessage={props.errorLoginMessage} />} />}
                 {props.activePage === ActiveMainPage.REGISTER_PAGE && <Route path="/" element={<Register onRegister={handleRegister}
-                                                                                                        onCancelRegister={handleCancelRegister} />} />}
+                                                                                                        onCancelRegister={handleCancelRegister}
+                                                                                                        errorRegisterMessage={props.errorRegisterMessage}
+                                                                                                        userRegisterInfo={props.userRegisterInfo} />} />}
             </Routes>
         </main>
     );

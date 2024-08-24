@@ -37,7 +37,6 @@ header .btn{
   color: #3c3310;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
-  margin-top: 15px;
 }
 
 header .btn:hover {
@@ -55,6 +54,11 @@ header .btn:active {
   outline: none !important;
   background-color: #675b3c !important;
   color: #c6bfa0 !important;
+}
+
+header .login-info-header-container {
+  display: flex;
+  justify-content: space-between;
 }
 
 .home h1, .users h1{
@@ -77,3 +81,10 @@ footer p {
   color: #6f6e6e;
 }
 
+/* Responsive Design */
+@media (max-width: 500px) {
+  .login-info-header-container {
+      flex-direction: column;
+      justify-content: center;
+  }
+}

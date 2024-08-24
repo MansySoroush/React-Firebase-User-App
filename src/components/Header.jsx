@@ -22,8 +22,15 @@ function Header(props) {
                 <div class="container-fluid d-flex justify-content-between align-items-center">
                     <h1>User Info App</h1>
 
-                    <div>
-                        {(props.userLoginStatus === LoginStatus.COMPLETE_LOGIN) && <p class="mb-0 d-inline">Welcome, <span id="userName">{props.userName}</span></p>} 
+                    <div className="login-info-header-container">
+                        {(props.userLoginStatus === LoginStatus.COMPLETE_LOGIN) && 
+                            <div className="d-flex align-items-center">
+                                {props.userPhotoURL && (
+                                    <img src={props.userPhotoURL} alt="User Profile" className="rounded-circle me-2" style={{ width: '40px', height: '40px' }} />
+                                )}
+                                <p className="mb-0 d-inline">Welcome, <span id="userName">{props.userName}</span></p>
+                            </div>
+                        }
                         {(props.userLoginStatus === LoginStatus.COMPLETE_LOGIN) && <button class="btn btn-primary d-inline ms-2" id="logoutButton" onClick={handleAuth}>Logout</button>}
                         {(props.userLoginStatus === LoginStatus.NO_USER_LOGIN) && <button class="btn btn-primary d-inline ms-2" id="loginButton" onClick={handleAuth}>Login</button>}
                         {(props.userLoginStatus === LoginStatus.LOGIN_IN_PROGRESS) && <p class="mb-0 d-inline">Login is in progress...</p>}

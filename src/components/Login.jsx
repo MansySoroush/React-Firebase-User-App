@@ -20,12 +20,11 @@ function Login(props) {
         });
     }
     
-    const handleLogin = (event) => {
+    const handleLogin = async (event) => {
         if (useGoogle) {
-            props.onLoginWithGoogle(loginInfo)
-        }
-        else {
-            props.onLogin(loginInfo)
+            props.onLoginWithGoogle(loginInfo);
+        } else {
+            props.onLogin(loginInfo);
         }
         event.preventDefault();
     };
@@ -57,21 +56,29 @@ function Login(props) {
                 onChange={handleChange}
                 placeholder="Password"
             />
-            <div className="checkbox-container">
-                <input 
-                    type="checkbox" 
-                    id="googleLogin" 
-                    checked={useGoogle} 
-                    onChange={handleCheckboxChange} 
-                />
-                <label htmlFor="googleLogin">Login with Google Account</label>
+            <div className="error-message-container">
+                <div className="checkbox-container">
+                    <input 
+                        type="checkbox" 
+                        id="googleLogin" 
+                        checked={useGoogle} 
+                        onChange={handleCheckboxChange} 
+                    />
+                    <label htmlFor="googleLogin">Login with Google Account</label>
+                </div>
+                {(props.errorLoginMessage !== "") && 
+                    <div className="login-error-message-notice">
+                        <p>{props.errorLoginMessage}</p>
+                    </div>
+                }
             </div>
+
             <div className="button-container">
-                    <button onClick={handleLogin}>
-                        {useGoogle ? "Login with Google" : "Login"}
-                    </button>
-                    <button onClick={handleShowRegister}>Register</button>
-                    <button onClick={handleCancelLogin}>Cancel</button>
+                <button onClick={handleLogin}>
+                    {useGoogle ? "Login with Google" : "Login"}
+                </button>
+                <button onClick={handleShowRegister} disabled={useGoogle}>Register</button>
+                <button onClick={handleCancelLogin}>Cancel</button>
             </div>
         </form>
     </div>
