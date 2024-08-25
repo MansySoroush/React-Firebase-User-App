@@ -1,10 +1,3 @@
-import {
-    addDoc, doc, getDoc,
-    collection,
-    getDocs,
-    query,
-    where,
-} from 'firebase/firestore';
 
 import { 
     signInWithPopup, signInWithEmailAndPassword,
@@ -107,50 +100,6 @@ export async function registerUserWithEmailAndPassword(email, password, displayN
             console.log(errorMessage);
             throw new Error(errorMessage);
         }
-    }
-}
-
-export async function addUser(userEmail, pass, name, userAge, userPhone, userCountry) {
-    const usersRef = collection(db, "users");  
-
-    const newUser = {
-        email: userEmail,
-        password: pass,
-        userName: name,
-        age: userAge,
-        phone: userPhone,
-        country: userCountry,
-    };
-
-    try {
-        // Add a new user with a generated ID
-        const docRef = await addDoc(usersRef, newUser);
-
-        // Create a user reference for the newly added user
-        const newDocRef = doc(db, 'users', docRef.id);
-
-        // Fetch the newly added user info
-        const newDoc = await getDoc(newDocRef);
-        if (newDoc.exists()) {
-            return newDoc.data();
-        }
-    } catch (error) {
-        throw new Error(error.message);
-    }
-
-    return null;
-}
-
-export async function getUsersByEmail(userEmail) {
-    const usersRef = collection(db, "users");  
-    const q = query(usersRef, where("email", "==", userEmail));  
-
-    try {
-        const querySnapshot = await getDocs(q);
-        const users = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        return users;  // Return the array of users
-    } catch (error) {
-        throw new Error(error.message);
     }
 }
 
