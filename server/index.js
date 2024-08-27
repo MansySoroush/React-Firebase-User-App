@@ -23,9 +23,9 @@ admin.initializeApp({
 app.get('/api/users', async (req, res) => {
 try {
     const listUsersResult = await admin.auth().listUsers();
-    console.log('Server response:', listUsersResult.users);
     res.json(listUsersResult.users);
 } catch (error) {
+    console.log('Failed Server response');
     res.status(500).json({ error: error.message });
 }
 });
