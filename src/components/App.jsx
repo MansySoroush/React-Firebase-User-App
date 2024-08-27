@@ -102,13 +102,11 @@ function App() {
           } else if (result.loginResult == LoginResult.UNSUCCESSFUL_LOGIN_NEED_TO_REGISTER) {
               console.log("User needs to register.");
               setRegisterStatus(RegisterStatus.REGISTER_BEFORE_LOGIN);
-
-              setUserRegisterInfo({
+        
+              showUserRegisterFormWithRegisterInfo({
                 email: loginInfo.email,
                 password: loginInfo.password,
               });
-        
-              showUserRegisterForm();
           } else if (result.loginResult == LoginResult.UNSUCCESSFUL_LOGIN_INVALID_EMAIL) {
             setErrorLoginMessage("Invalid Email!");
           } else if (result.loginResult == LoginResult.UNSUCCESSFUL_LOGIN_WRONG_PASSWORD) {
@@ -128,8 +126,8 @@ function App() {
         const user = await loginUserWithGoogle();
         console.log(user);
         if (user) {
-          completeUserLoginProcess(user.displayName, user.photoURL);
           console.log("Successful Login with Google!");
+          completeUserLoginProcess(user.displayName, user.photoURL);
         } else {
           resetUserLoginStatus();
           console.log("Unsuccessful Login with Google!");
@@ -190,8 +188,17 @@ function App() {
     }
   }
 
+  const showUserRegisterFormWithRegisterInfo = (regInfo) => {
+    if (loginState === LoginStatus.LOGIN_IN_PROGRESS) {
+      setUserRegisterInfo(regInfo);
+      setErrorRegisterMessage("");
+      setActiveMainPage(ActiveMainPage.REGISTER_PAGE);
+    }
+  }
+
   const showUserRegisterForm = () => {
     if (loginState === LoginStatus.LOGIN_IN_PROGRESS) {
+      setUserRegisterInfo({});
       setErrorRegisterMessage("");
       setActiveMainPage(ActiveMainPage.REGISTER_PAGE);
     }

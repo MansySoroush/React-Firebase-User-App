@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 function Users() {
     const [users, setUsers] = useState([]);
-    
+ /*   
     useEffect(() => {
         fetch('/api/users')
             .then(response => {
@@ -21,7 +21,7 @@ function Users() {
             })
             .catch(error => console.error('Error fetching users:', error));
     }, []);
-        
+        */
     return (
         <div className='users'>
             <h1>Registered Users:</h1>

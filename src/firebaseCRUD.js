@@ -10,12 +10,14 @@ import {
 } from "firebase/storage"; 
 
 import { db, auth, googleAuth, storage } from "./firebase"
+import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
 
 export const LoginResult = {
     SUCCESSFUL_LOGIN: 'SUCCESSFUL_LOGIN',
     UNSUCCESSFUL_LOGIN_NEED_TO_REGISTER: 'UNSUCCESSFUL_LOGIN_NEED_TO_REGISTER',
     UNSUCCESSFUL_LOGIN_INVALID_EMAIL: 'UNSUCCESSFUL_LOGIN_INVALID_EMAIL',
     UNSUCCESSFUL_LOGIN_WRONG_PASSWORD: 'UNSUCCESSFUL_LOGIN_WRONG_PASSWORD',
+    UNSUCCESSFUL_LOGIN_FAILED_REGISTRATION: 'UNSUCCESSFUL_LOGIN_FAILED_REGISTRATION',
 };
 
 export const RegisterResult = {
@@ -32,6 +34,18 @@ export async function loginUserWithGoogle() {
         const result = await signInWithPopup(auth, googleAuth);        
         // Signed in
         const user = result.user;
+
+        try {
+            const newUserDoc = await addUserDocumentWithCustomUID(user);
+            if (newUserDoc) {
+                console.log("New User Doc Added after Login with Google.");
+            } else {
+                console.log("Failed Adding New User Doc after Login with Google!");
+            }
+        } catch(error) {
+            console.log("Unsuccessful adding new user doc after Login with Google!");
+        }
+
         return user;  // return the authenticated user
     } catch (error) {
         throw new Error(error.message);
@@ -87,7 +101,7 @@ export async function registerUserWithEmailAndPassword(email, password, displayN
         var errorMessage = error?.message || "An unknown error occurred";
         console.log("errorCode createUserWithEmailAndPassword: " + errorCode);
 
-        if ( errorCode == 'email-already-in-use' ) {
+        if ( errorCode == 'auth/email-already-in-use' ) {
             console.log('You already have an account with that email.');
             return { user: null, registerResult: RegisterResult.UNSUCCESSFUL_REGISTER_DUPLICATE_EMAIL };                
         } else if ( errorCode == 'auth/invalid-email' ) {
@@ -110,6 +124,18 @@ export async function loginUserWithEmailAndPassword(email, password) {
         const user = userCredential.user;
         console.log("User signed in: ", user);
         await user.reload();  // Reload user data
+
+        try {
+            const newUserDoc = await addUserDocumentWithCustomUID(user);
+            if (newUserDoc) {
+                console.log("New User Doc Added");
+            } else {
+                console.log("Failed Adding New User Doc!");
+            }
+        } catch(error) {
+            console.log("Unsuccessful adding new user doc!");
+        }
+
         return { user: user, loginResult: LoginResult.SUCCESSFUL_LOGIN };
     } catch (error) {
         var errorCode = error?.code || "unknown";
@@ -120,7 +146,7 @@ export async function loginUserWithEmailAndPassword(email, password) {
 
         if (( errorCode === 'auth/user-not-found' ) || ( errorCode == 'auth/invalid-credential' )) {
             console.log('Need to register before login');
-            return { user: null, loginResult: LoginResult.UNSUCCESSFUL_LOGIN_NEED_TO_REGISTER };
+            return { user: null, loginResult: LoginResult.UNSUCCESSFUL_LOGIN_NEED_TO_REGISTER };       
         } else if ( errorCode === 'auth/wrong-password' ) {
             console.log('Wrong password. Please try again');
             return { user: null, loginResult: LoginResult.UNSUCCESSFUL_LOGIN_WRONG_PASSWORD };
@@ -134,5 +160,146 @@ export async function loginUserWithEmailAndPassword(email, password) {
     }
 }
 
+export async function addUser(userEmail, pass, name) {
+    const usersRef = collection(db, "users");  
+
+    const newUser = {
+        email: userEmail,
+        password: pass,
+        userName: name,
+    };
+
+    try {
+        // Add a new user with a generated ID
+        const docRef = await addDoc(usersRef, newUser);
+
+        // Create a user reference for the newly added user
+        const newDocRef = doc(db, 'users', docRef.id);
+
+        // Fetch the newly added user info
+        const newDoc = await getDoc(newDocRef);
+        if (newDoc.exists()) {
+            return newDoc.data();
+        }
+    } catch (error) {
+        throw new Error(error.message);
+    }
+
+    return null;
+}
+
+export async function getUserByEmail(userEmail) {
+    const usersRef = collection(db, "users");  
+    const q = query(usersRef, where("email", "==", userEmail));  
+
+    try {
+        const querySnapshot = await getDocs(q);
+        const users = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        if (users.length === 0)
+            return null;
+
+        return users[0]; 
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
 
 
+export async function addNewUser(userEmail, pass, name)
+{
+    try {
+        const userDoc = await getUserByEmail(userEmail);
+        if (userDoc === null) {
+            const newUserDoc = await addUser(userEmail, pass, name);
+            console.log("newUserDoc: " + newUserDoc)
+        }
+    } catch(error) {
+        throw new Error(error.message);
+    }
+}
+
+export async function getUserDocumentById(uid) {
+    try {
+        // Reference to the specific document in the "users" collection by user ID
+        const userDocRef = doc(db, "users", uid);
+
+        // Fetch the document from Firestore
+        const userDocSnap = await getDoc(userDocRef);
+
+        // Check if the document exists
+        if (userDocSnap.exists()) {
+            // Return the document data
+            return userDocSnap.data();
+        } else {
+            // Document does not exist
+            console.log("No such user!");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error in Fetching User Document:", error);
+        return null;
+    }
+}
+
+
+export async function addUserDocument(user) {
+    if (!user) {
+        console.error("Invalid or Null User!");
+        return;
+    }
+
+    try {
+        const userDoc = await getUserDocumentById(user.uid);
+        if (userDoc !== null) {
+            console.error("Duplicated User!");
+            return;
+        }
+
+        console.log("Before Adding New User...");
+
+        const userDocRef = await addDoc(collection(db, "users"), {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+        });
+
+        console.log("Document written with ID: ", userDocRef.id);
+        return userDocRef;
+    } catch (error) {
+        console.error("Error in Adding New User Document: ", error.message);
+    }
+    return null;
+}
+
+export async function addUserDocumentWithCustomUID(user) {
+    if (!user) {
+        console.error("Invalid or Null User!");
+        return;
+    }
+
+    try {
+        const userDoc = await getUserDocumentById(user.uid);
+        if (userDoc !== null) {
+            console.error("Duplicated User!");
+            return;
+        }
+
+        console.log("Before Adding New User...");
+
+        // Reference to the document with the custom UID in the "users" collection
+        const userDocRef = doc(db, "users", user.uid);
+
+        // Add the document to Firestore with the custom UID
+        await setDoc(userDocRef, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+        });
+
+        console.log("Document written with ID: ", userDocRef.id);
+        console.log("userDocRef: ", userDocRef);
+        return userDocRef;
+    } catch (error) {
+        console.error("Error in Adding New User Document: ", error.message);
+    }
+}
