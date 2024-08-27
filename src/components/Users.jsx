@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './userCards.css';
 
 function Users() {
     const [users, setUsers] = useState([]);
@@ -23,14 +24,18 @@ function Users() {
     return (
         <div className='users'>
             <h1>Registered Users:</h1>
-
-            <ul>
+            <div className='user-card-container'>
                 {users.map(user => (
-                <li key={user.uid}>
-                    {user.displayName || user.email}
-                </li>
+                    <div className='user-card' key={user.uid}>
+                        <img src={user.photoURL || 'https://via.placeholder.com/150'} alt={`${user.displayName || user.email}`} className='user-avatar' />
+                        <div className='user-info'>
+                            <h2>{user.displayName || user.email}</h2>
+                            <p>{user.email}</p>
+                        </div>
+                    </div>
                 ))}
-            </ul>
+            </div>
+
         </div>
     );
 }
