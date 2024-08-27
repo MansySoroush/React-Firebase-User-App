@@ -36,7 +36,7 @@ export async function loginUserWithGoogle() {
         const user = result.user;
 
         try {
-            const newUserDoc = await addUserDocumentWithCustomUID(user);
+            const newUserDoc = await addUserDocumentRegisteredUID(user);
             if (newUserDoc) {
                 console.log("New User Doc Added after Login with Google.");
             } else {
@@ -68,13 +68,13 @@ export async function registerUserWithEmailAndPassword(email, password, displayN
         const user = userCredential.user;
 
         let photoURL = "";
-/*
+
         if (user && imageFile) {
             const storageRef = ref(storage, `profile_images/${user.uid}`);
             await uploadBytes(storageRef, imageFile); // Upload image to Firebase storage
             photoURL = await getDownloadURL(storageRef); // Get the image URL
         }
-*/
+
         if (user) {
             try {
                 // Update the user's profile
@@ -126,7 +126,7 @@ export async function loginUserWithEmailAndPassword(email, password) {
         await user.reload();  // Reload user data
 
         try {
-            const newUserDoc = await addUserDocumentWithCustomUID(user);
+            const newUserDoc = await addUserDocumentRegisteredUID(user);
             if (newUserDoc) {
                 console.log("New User Doc Added");
             } else {
@@ -160,34 +160,6 @@ export async function loginUserWithEmailAndPassword(email, password) {
     }
 }
 
-export async function addUser(userEmail, pass, name) {
-    const usersRef = collection(db, "users");  
-
-    const newUser = {
-        email: userEmail,
-        password: pass,
-        userName: name,
-    };
-
-    try {
-        // Add a new user with a generated ID
-        const docRef = await addDoc(usersRef, newUser);
-
-        // Create a user reference for the newly added user
-        const newDocRef = doc(db, 'users', docRef.id);
-
-        // Fetch the newly added user info
-        const newDoc = await getDoc(newDocRef);
-        if (newDoc.exists()) {
-            return newDoc.data();
-        }
-    } catch (error) {
-        throw new Error(error.message);
-    }
-
-    return null;
-}
-
 export async function getUserByEmail(userEmail) {
     const usersRef = collection(db, "users");  
     const q = query(usersRef, where("email", "==", userEmail));  
@@ -204,19 +176,6 @@ export async function getUserByEmail(userEmail) {
     }
 }
 
-
-export async function addNewUser(userEmail, pass, name)
-{
-    try {
-        const userDoc = await getUserByEmail(userEmail);
-        if (userDoc === null) {
-            const newUserDoc = await addUser(userEmail, pass, name);
-            console.log("newUserDoc: " + newUserDoc)
-        }
-    } catch(error) {
-        throw new Error(error.message);
-    }
-}
 
 export async function getUserDocumentById(uid) {
     try {
@@ -241,37 +200,7 @@ export async function getUserDocumentById(uid) {
     }
 }
 
-
-export async function addUserDocument(user) {
-    if (!user) {
-        console.error("Invalid or Null User!");
-        return;
-    }
-
-    try {
-        const userDoc = await getUserDocumentById(user.uid);
-        if (userDoc !== null) {
-            console.error("Duplicated User!");
-            return;
-        }
-
-        console.log("Before Adding New User...");
-
-        const userDocRef = await addDoc(collection(db, "users"), {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-        });
-
-        console.log("Document written with ID: ", userDocRef.id);
-        return userDocRef;
-    } catch (error) {
-        console.error("Error in Adding New User Document: ", error.message);
-    }
-    return null;
-}
-
-export async function addUserDocumentWithCustomUID(user) {
+export async function addUserDocumentRegisteredUID(user) {
     if (!user) {
         console.error("Invalid or Null User!");
         return;
@@ -291,7 +220,6 @@ export async function addUserDocumentWithCustomUID(user) {
 
         // Add the document to Firestore with the custom UID
         await setDoc(userDocRef, {
-            uid: user.uid,
             email: user.email,
             displayName: user.displayName,
         });

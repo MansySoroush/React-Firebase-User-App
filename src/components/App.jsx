@@ -42,6 +42,7 @@ function App() {
     setLoginState(LoginStatus.NO_USER_LOGIN);
     setRegisterStatus(RegisterStatus.JUST_REGISTER);
     setCurrentUserName("");
+    setCurrentUserPhotoURL(null);
     setErrorLoginMessage("");
     setErrorRegisterMessage("");
   }
@@ -55,11 +56,10 @@ function App() {
     if (userName !== "") {
       setCurrentUserName(userName);
     }
-/*
+
     if (userPhotoURL) {
       setCurrentUserPhotoURL(userPhotoURL);
     }
-      */
   }
 
   const forceUserToLogout = async () => {
